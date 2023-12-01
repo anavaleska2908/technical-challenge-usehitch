@@ -1,53 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
-  provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mongodb"
-  url      = env("DATABASE_URL")
+    provider = "mongodb"
+    // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
+    // Further reading:
+    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
+    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+    url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(uuid()) @map("_id")
-  email     String   @unique
-  name      String
-  password  String
-  createdAt DateTime @default(now())
-  toDos     Todo[]
+model Post {
+    id        String   @id @default(cuid()) @map("_id")
+    name      String
+    text      String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model Todo {
-  id        String    @id @default(uuid()) @map("_id")
-  title     String
-  tags      Tag[]     @relation(fields: [tagId], references: [id])
-  tagId     String[]
-  subtasks  Subtask[]
-  image     Image[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  owner     User      @relation(fields: [ownerId], references: [id])
-  ownerId   String
+    id        String   @id @default(cuid()) @map("_id")
+    title     String
+    image     String?
+    completed Boolean  @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([title])
 }
 
-model Tag {
-  id     String   @id @default(uuid()) @map("_id")
-  name   String
-  todos  Todo[]   @relation(fields: [todoId], references: [id])
-  todoId String[]
+// Necessary for Next auth
+model Account {
+    id                String  @id @default(cuid()) @map("_id")
+    userId            String
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String? // @db.Text
+    access_token      String? // @db.Text
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String? // @db.Text
+    session_state     String?
+    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
 }
 
-model Subtask {
-  id          String @id @default(uuid()) @map("_id")
-  description String
-  todoId      String
-  todo        Todo   @relation(fields: [todoId], references: [id])
+model Session {
+    id           String   @id @default(cuid()) @map("_id")
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model Image {
-  id       String @id @default(uuid()) @map("_id")
-  filename String
-  url      String
-  todoId   String
-  todo     Todo   @relation(fields: [todoId], references: [id])
+model User {
+    id            String    @id @default(cuid()) @map("_id")
+    name          String?
+    email         String?   @unique
+    emailVerified DateTime?
+    image         String?
+    accounts      Account[]
+    sessions      Session[]
+}
+
+model VerificationToken {
+    identifier String   @id @map("_id")
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
 }
