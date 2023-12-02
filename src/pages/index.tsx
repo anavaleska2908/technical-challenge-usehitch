@@ -120,16 +120,16 @@ export default function Home() {
   );
 }
 
-const Content: React.FC = () => {
+// const Content: React.FC = () => {
 
 
-  return (
-    <div>
-      <div></div>
-      <div></div>
-    </div>
-  )
-}
+//   return (
+//     <div>
+//       <div></div>
+//       <div></div>
+//     </div>
+//   )
+// }
 
 // function AuthShowcase() {
 //   const { data: sessionData } = useSession();

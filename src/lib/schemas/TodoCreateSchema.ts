@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const TodoCreateSchema = z.object({
   title: z.string().min(1).max(50),
-  image: z.string().url().optional(),
+  image: z.string().optional(),
   completed: z.boolean(),
 })
 

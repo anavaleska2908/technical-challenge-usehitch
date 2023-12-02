@@ -11,14 +11,7 @@ import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 
 
 export default function PostTemporary() {
-  const { mutate } = api.post.create.useMutation({
-    onSuccess: (data) => {
-      console.log("Mutation success", data)
-    },
-    onError: (error) => {
-      console.log("Mutation error", error)
-    }
-  });
+  const { mutate } = api.post.create.useMutation();
 
   const {
     register,
@@ -29,11 +22,6 @@ export default function PostTemporary() {
   });
 
   const formAddPost = (data: PostCreateSchema) => {
-    console.log("oi")
-    console.log(data)
-
-
-
     mutate(data);
   }
 
