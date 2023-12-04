@@ -1,42 +1,65 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import { api, type RouterOutputs } from "~/utils/api";
 // import styles from "./index.module.css";
-import Header from "~/components/Header";
+import { Header } from "~/components/Header";
 // import TodoEditor from "~/components/TodoEditor";
 import PostTemporary from "~/components/PostTemporaty";
 // import TodoList from "~/components/TodoList";
-import { Container, Grid } from "@mui/material";
-import { useState, useEffect, SetStateAction } from "react";
+import { Button, Container, Grid, Typography } from "@mui/material";
+import { useState, useEffect, SetStateAction, useCallback } from "react";
 import { TodoListData } from "~/lib/schemas/TodoSchema";
 import { TodoCreateSchema, TodoCreateData } from "~/lib/schemas/TodoCreateSchema";
+import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { authOptions } from "~/server/auth";
+import { useRouter } from "next/router";
+
 
 
 
 export default function Home() {
-  // const { data: sessionData } = useSession();
-  const [getTodos, setGetTodos] = useState<TodoListData | undefined>([]);
-  const [createTodo, setCreateTodo] = useState<TodoCreateData | undefined>();
+  const { data: sessionData } = useSession();
+  const router = useRouter();
 
-  // const getTodoList = async () => {
-  //   try {
-  //     const { data: allTodos } = api.todo.getAll.useQuery();
+  const onSubmit = useCallback(async () => {
+    await signIn("google", {callbackUrl: "/dashboard"})
+  }, [])
 
-  //     allTodos ?? setGetTodos(allTodos);
-  //   } catch (error) {
-  //     console.error("Error on get: ", error)
-  //   }
-  // }
+  if (sessionData?.user) {
+    router.push("/dashboard")
+  }
 
-  // useEffect(() => {
-
-  //   getTodoList();
-
-  // }, [createTodo]);
 
   return (
     <>
-      <Header />
-      <Container component="main" maxWidth="xs" sx={{ marginTop: 4}}>
+      {sessionData ? (
+        <Header />
+      ) : (
+        <Header />
+      )}
+      <Container
+        component="main"
+        maxWidth="xs"
+        sx={{
+          marginTop: 4,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column"
+        }}>
+
+        <Typography variant="h2">
+          Create your own To-Dos
+        </Typography>
+        {/* <Link href={"/dashboard"}> */}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => onSubmit()}
+          >
+            Sign In
+          </Button>
+        {/* </Link> */}
 
       </Container>
 

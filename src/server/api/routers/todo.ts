@@ -10,36 +10,38 @@ import {
 // import { todoInput } from "~/types";
 
 export const todoRouter = createTRPCRouter({
-  getAll: publicProcedure
-    .query(({ ctx }) => {
-      return ctx.prisma.todo.findMany({
+  getAll: protectedProcedure
+    .query (async({ ctx }) => {
+      return await ctx.prisma.todo.findMany({
+        where: {
+          createdById: ctx.session.user.id
+        },
         orderBy: [
           {
             completed: "asc",
-          },
-          {
-            title: "asc"
           }
         ]
       })
     }),
 
-  create: publicProcedure
+  create: protectedProcedure
     .input(TodoCreateSchema)
     .mutation(({ ctx, input }) => {
       return ctx.prisma.todo.create({
         data: {
           title: input.title,
-          image: input?.image
+          image: input?.image,
+          createdById: ctx.session.user.id
         }
       })
     }),
 
-  getTodoById: publicProcedure
+  getTodoById: protectedProcedure
     .input(z.string())
     .query(({ ctx, input }) => {
     return ctx.prisma.todo.findFirst({
       where: {
+        createdById: ctx.session.user.id,
         id: input
       },
       select: {
@@ -51,7 +53,7 @@ export const todoRouter = createTRPCRouter({
     });
   }),
 
-  update: publicProcedure
+  update: protectedProcedure
     .input(TodoUpdateSchema)
     .mutation(async ({ ctx, input: { title, image, id, completed } }) => {
     return ctx.prisma.todo.update({
@@ -61,17 +63,19 @@ export const todoRouter = createTRPCRouter({
         completed
       },
       where: {
-        id
+        id,
+        createdById: ctx.session.user.id
       },
     });
   }),
 
-  deleteTodo: publicProcedure
+  deleteTodo: protectedProcedure
     .input(z.string())
     .mutation(({ ctx, input }) => {
     return ctx.prisma.todo.delete({
       where: {
-        id: input
+        id: input,
+        createdById: ctx.session.user.id
       },
     });
     }),

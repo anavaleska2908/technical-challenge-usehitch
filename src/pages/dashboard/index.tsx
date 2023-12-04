@@ -1,3 +1,4 @@
+'use client'
 import { api } from "~/utils/api";
 import { TodoData, TodoListData, TodoSchema } from "~/lib/schemas/TodoSchema";
 import { TodoCreateSchema } from "~/lib/schemas/TodoCreateSchema";
@@ -8,16 +9,35 @@ import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOu
 import Link from "next/link";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
+import {Header} from "~/components/Header";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { useRouter } from 'next/router';
+
 
 export default function TodoList() {
+  const router = useRouter()
+  const { data: sessionData } = useSession();
   const [data, setData] = useState<any>([]);
   const [deletedTodo, SetDeletedTodo] = useState<any>();
+  const [updatedTodo, SetUpdatedTodo] = useState<any>();
+
+
+  const refreshData = () => router.replace(router.asPath);
 
   const allTodos = api.todo.getAll.useQuery();
+  // const reloadPage = () => {
+  //   location.reload()
+  // }
 
   useEffect(() => {
     setData(allTodos.data);
     allTodos.refetch()
+    refreshData()
+
+    if (!sessionData?.user) {
+      router.push("/")
+    }
   }, [deletedTodo])
 
   const deleteTodo = api.todo.deleteTodo.useMutation();
@@ -28,25 +48,37 @@ export default function TodoList() {
     toast.warning("To-do deleted.")
   }
 
+  const firstTodos = allTodos.data?.filter((todos) => !todos.completed).length ?? 0;
+  const completedTodos = allTodos.data?.filter((todos) => todos.completed).length ?? 0;
+
 
   return (
     <>
+      <Header />
       <Container component="main" maxWidth="xs">
         <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <Typography
-            variant="h4"
-            component="h1"
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              marginBottom: 3,
-              marginTop: 2
-            }}
-          >
-            List To-Dos
-          </Typography>
+          <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "space-around", alignItems: "center" }}>
+            <Typography
+              variant="h4"
+              component="h1"
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: 3,
+                marginTop: 2
+              }}
+            >
+              List To-Dos
+            </Typography>
+            <Link href={"/todo/"}>
+              <Button sx={{color: "text.primary"}}>
+                <AddCircleOutlineOutlinedIcon sx={{ width: "2.5rem", height: "2.5rem"}} />
+              </Button>
+            </Link>
+          </Box>
+
           {allTodos.data?.length ? allTodos.data.map((todo: any) => (
             <Container key={todo.id} sx={{ marginBottom: 4}}>
               <Paper elevation={0} variant="outlined">
@@ -107,11 +139,6 @@ export default function TodoList() {
                 justifyContent: "center",
                 alignItems: "center"
                   }}>Create your first to-do</Typography>
-                <Link href={"/todo/"}>
-                  <Button sx={{color: "text.primary"}}>
-                    <AddCircleOutlineOutlinedIcon />
-                  </Button>
-                </Link>
           </Container>
       )
       }

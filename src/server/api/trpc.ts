@@ -7,6 +7,7 @@
  * need to use are documented accordingly near the end.
  */
 
+import * as trpc from "@trpc/server";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
@@ -15,6 +16,11 @@ import { ZodError } from "zod";
 
 import { getServerAuthSession } from "~/server/auth";
 import { prisma } from "~/server/db";
+
+// Add
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth";
+
 
 /**
  * 1. CONTEXT
@@ -61,6 +67,8 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
     session,
   });
 };
+
+export type Context = trpc.inferAsyncReturnType<typeof createTRPCContext>
 
 /**
  * 2. INITIALIZATION
