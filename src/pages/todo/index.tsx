@@ -2,25 +2,20 @@
 import { api } from "~/utils/api";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { TodoCreateData, TodoCreateSchema } from "~/lib/schemas/TodoCreateSchema";
-import { Box, Button, Checkbox, Container, FormControlLabel, FormGroup, ImageList, Input, LinearProgress, TextField, Typography } from "@mui/material";
+import { Box, Button, Checkbox, Container, FormControlLabel, FormGroup, TextField, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
 import {Header} from "~/components/Header";
 import Link from "next/link";
-import { Image } from "@mui/icons-material";
 import { useEffect, useState } from "react";
-import LoadingButton from '@mui/lab/LoadingButton';
 import { useRouter } from "next/router";
 import { toBase64 } from "~/utils/toBase64";
 
 export default function TodoCreate() {
   const [base64, setBase64] = useState<string | null>(null);
-
-  const createTodo = api.todo.create.useMutation();
-
   const { data: sessionData } = useSession();
   const router = useRouter();
+
+  const createTodo = api.todo.create.useMutation();
 
   useEffect(() => {
     if (!sessionData?.user) {
@@ -33,16 +28,11 @@ export default function TodoCreate() {
     handleSubmit,
     reset,
     formState: { errors }
-  } = useForm({
-    // resolver: zodResolver(TodoCreateSchema)
-  });
-
-
+  } = useForm();
 
   const formAddTodo = async (data: any) => {
     const base64 = await toBase64(data.image[0] as unknown as File);
     setBase64(base64 as string);
-
     const formData = new FormData();
     formData.append("file", base64 as string);
     formData.append("upload_preset", "technicalChallengeUsehitch");
@@ -50,23 +40,18 @@ export default function TodoCreate() {
     try {
       const uploadResponse = await fetch("https://api.cloudinary.com/v1_1/anavaleskasantos/image/upload", {
         method: "POST",
-
         body: formData
       });
-
       if (!uploadResponse.ok) {
         throw new Error("Image upload failed.")
       }
-
       const imageData = await uploadResponse.json();
       const imageUrl = imageData.secure_url;
-
       const newData = {
         title: data.title,
         completed: data.completed,
         image: imageUrl
       }
-
       createTodo.mutate(newData);
       reset();
       toast.success(`Your new to-do ${newData.title} has been created.`)
@@ -99,7 +84,6 @@ export default function TodoCreate() {
             </Button>
           </Link>
         </Box>
-
         <form onSubmit={handleSubmit(formAddTodo)}>
           <Box sx={{ display: "flex", flexDirection: "column"}}>
             <TextField
@@ -109,7 +93,6 @@ export default function TodoCreate() {
             size="small"
             {...register("title", {required: true})}
             error={!!errors.title}
-            // helperText={errors.title?.message}
           />
           <input
             type="file"

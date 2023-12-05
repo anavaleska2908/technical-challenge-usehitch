@@ -17,11 +17,6 @@ import { ZodError } from "zod";
 import { getServerAuthSession } from "~/server/auth";
 import { prisma } from "~/server/db";
 
-// Add
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth";
-
-
 /**
  * 1. CONTEXT
  *

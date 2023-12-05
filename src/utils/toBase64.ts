@@ -1,5 +1,4 @@
 export const toBase64 = (file?: File) => {
-  console.log('file', file)
   if (file === undefined) {
       return null
     } else {

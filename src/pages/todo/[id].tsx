@@ -1,15 +1,12 @@
 'use client'
 import { api } from "~/utils/api";
-import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { TodoUpdateSchema, TodoUpdateData } from "~/lib/schemas/TodoUpdateSchema";
-import { Box, Button, Checkbox, Container, FormControlLabel, FormGroup, Paper, Stack, TextField, Typography } from "@mui/material";
+import { TodoUpdateData } from "~/lib/schemas/TodoUpdateSchema";
+import { Box, Button, Checkbox, Container, FormControlLabel, FormGroup, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { TodoData } from "~/lib/schemas/TodoSchema";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
 import {Header} from "~/components/Header";
 import Image from "next/image";
 import { toBase64 } from "~/utils/toBase64";
@@ -19,30 +16,23 @@ import Link from "next/link";
 export default function TodoUpdate() {
   const { data: sessionData } = useSession();
   const [base64, setBase64] = useState<any>(null);
-  const [updateData, setUpdateData] = useState(false)
-  const [getData, setGetData] = useState<TodoData | undefined>()
 
   const router = useRouter();
   const { id } = router.query;
   const idTodo = String(id);
 
-
   const fetchTodo = api.todo.getTodoById.useQuery(idTodo);
+  const updateTodo = api.todo.update.useMutation();
 
   const {
     register,
     handleSubmit,
     setValue,
     formState: { errors }
-  } = useForm<TodoUpdateData>({
-    // resolver: zodResolver(TodoUpdateSchema)
-  });
-
-  const updateTodo = api.todo.update.useMutation();
+  } = useForm<TodoUpdateData>();
 
   const formUpdateTodo = async (data: any) => {
     if (data.image) {
-      console.log('data.image', data.image)
       const base64 = await toBase64(data?.image[0] as unknown as File);
       setBase64(base64 as string);
       const formData = new FormData();

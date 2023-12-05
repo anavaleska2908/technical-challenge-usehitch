@@ -1,7 +1,5 @@
 'use client'
 import { api } from "~/utils/api";
-import { TodoData, TodoListData, TodoSchema } from "~/lib/schemas/TodoSchema";
-import { TodoCreateSchema } from "~/lib/schemas/TodoCreateSchema";
 import { Avatar, Box, Button, Checkbox, Container, FormControlLabel, FormGroup, Grid, Paper, TextField, Typography } from "@mui/material";
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import CreateOutlinedIcon from '@mui/icons-material/CreateOutlined';
@@ -11,7 +9,6 @@ import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import {Header} from "~/components/Header";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
 import { useRouter } from 'next/router';
 
 
@@ -20,15 +17,9 @@ export default function TodoList() {
   const { data: sessionData } = useSession();
   const [data, setData] = useState<any>([]);
   const [deletedTodo, SetDeletedTodo] = useState<any>();
-  const [updatedTodo, SetUpdatedTodo] = useState<any>();
-
 
   const refreshData = () => router.replace(router.asPath);
-
   const allTodos = api.todo.getAll.useQuery();
-  // const reloadPage = () => {
-  //   location.reload()
-  // }
 
   useEffect(() => {
     setData(allTodos.data);
@@ -47,10 +38,6 @@ export default function TodoList() {
     SetDeletedTodo(id)
     toast.warning("To-do deleted.")
   }
-
-  const firstTodos = allTodos.data?.filter((todos) => !todos.completed).length ?? 0;
-  const completedTodos = allTodos.data?.filter((todos) => todos.completed).length ?? 0;
-
 
   return (
     <>
@@ -107,7 +94,6 @@ export default function TodoList() {
                       alignItems: "center",
                       paddingLeft: 2
                     }}>
-
                   <FormGroup>
                     <FormControlLabel
                       control={<Checkbox defaultChecked={todo.completed} sx={{ '&:hover': { bgcolor: 'transparent' }}} color="success" disabled />}
@@ -126,7 +112,6 @@ export default function TodoList() {
                   </Box>
                 </Grid>
               </Paper>
-
             </Container>
           )) : (
           <Container
@@ -140,13 +125,9 @@ export default function TodoList() {
                 alignItems: "center"
                   }}>Create your first to-do</Typography>
           </Container>
-      )
-      }
+      )}
         </Box>
-
       </Container>
-
-
     </>
   )
 }
